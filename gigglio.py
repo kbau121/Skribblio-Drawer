@@ -4,6 +4,7 @@ import requests
 from io import BytesIO
 import sys
 import colorErrors
+import multiprocessing
 
 def fixColor(hexColor):
 	r = ((hexColor >> 16) % 256)
@@ -55,29 +56,33 @@ def closestColor(inputColor, metric):
 
 	return bestColorIndex, bestColor
 
+def processWithMetric(arg):
+	data, metric = arg
+	colorIndices = np.zeros(data.shape[0:2], np.int32)
+	for y in range(data.shape[0]):
+		for x in range(data.shape[1]):
+			colorIndices[y, x], data[y, x] = closestColor(data[y, x], metric)
+	return data, colorIndices
+
 def doTheThing(dif):
 	# url = "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_retouched.jpg/687px-Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_retouched.jpg"
 	# url = "https://vignette.wikia.nocookie.net/the-many-adventures-of-minecraft-rogers/images/4/44/1200x630bb.jpg/revision/latest?cb=20170512053111"
 	if len(sys.argv) > 1:
 		url = sys.argv[1]
 	else:
-		# url = "https://vignette.wikia.nocookie.net/avatar/images/8/82/Fanon_Appa.png/revision/latest?cb=20130308032654&format=original"
-		url = input("Image URL: ")
+		url = "https://vignette.wikia.nocookie.net/avatar/images/8/82/Fanon_Appa.png/revision/latest?cb=20130308032654&format=original"
+		# url = input("Image URL: ")
 	img = PIL.Image.open(BytesIO(requests.get(url).content))
 	img.thumbnail(dif, PIL.Image.ANTIALIAS)
 	# img.show()
 
+	data = np.array(np.asarray(img))[:,:,:3]
 
-	dataList = []
-	colorIndicesList = []
-	for metric in colorErrors.COLOR_ERRORS:
-		data = np.array(np.asarray(img))[:,:,:3]
-		colorIndices = np.zeros(data.shape[0:2], np.int32)
-		for y in range(data.shape[0]):
-			for x in range(data.shape[1]):
-				colorIndices[y, x], data[y, x] = closestColor(data[y, x], metric)
-		colorIndicesList.append(colorIndices)
-		dataList.append(data)
+	pool = multiprocessing.Pool(None)
+
+	# output = [processWithMetric(metric) for metric in colorErrors.COLOR_ERRORS]
+	output = pool.map(processWithMetric, zip([data] * len(colorErrors.COLOR_ERRORS), colorErrors.COLOR_ERRORS))
+	dataList, colorIndicesList = zip(*output)
 
 	return colorIndicesList, dataList
 
