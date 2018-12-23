@@ -3,6 +3,7 @@ import time
 from pynput.mouse import Button, Controller
 
 import gigglio
+import colorErrors
 
 mouse = Controller()
 
@@ -27,7 +28,13 @@ def clickAt(clickPos):
 	mouse.click(Button.left, 1)
 	mouse.position = tempPos
 
-thing, otherThing = gigglio.doTheThing(dif)
+colorIndicesList, imageList = gigglio.doTheThing(dif)
+gigglio.showTiled(imageList)
+
+for i, name in enumerate(colorErrors.COLOR_ERROR_NAMES):
+	print("[{}] {}".format(i, name))
+bestIndex = int(input("Pick best image: "))
+thing = colorIndicesList[bestIndex]
 
 clickAt(brushSize)
 time.sleep(0.01)

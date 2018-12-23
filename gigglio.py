@@ -91,8 +91,11 @@ def tileImages(images, numColumns=3):
 		rows.append(np.concatenate(imagesToTile[i:i+numColumns], axis=1))
 	return np.concatenate(rows, axis=0)
 
-if __name__=="__main__":
-	colorIndicesList, dataList = doTheThing([100, 100])
+def showTiled(dataList):
 	data = tileImages(dataList)
 	outputImg = PIL.Image.fromarray(data)
 	outputImg.resize((outputImg.size[0] * 5, outputImg.size[1] * 5), PIL.Image.NEAREST).show()
+
+if __name__=="__main__":
+	colorIndicesList, dataList = doTheThing([100, 100])
+	showTiled(dataList)
