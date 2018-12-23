@@ -2,7 +2,6 @@ import numpy as np
 import PIL.Image
 import requests
 from io import BytesIO
-import colorsys
 import sys
 import colorErrors
 
@@ -40,29 +39,14 @@ COLORS = [
 	# fixColor(0x8e9359)
 ]
 
-def closestColor(inputColor):
-
-	# inputColorNorm = np.array(inputColor, np.float32) / 255
-	# inputColorNorm /= max(*inputColorNorm)
-	# inputColorHSV = colorsys.rgb_to_hsv(*(np.array(inputColor, np.float32) / 255))
+def closestColor(inputColor, metric):
 
 	bestColorIndex = None
 	bestColor = None
 	bestError = np.inf
 	for colorIndex, color in enumerate(COLORS):
 
-		# colorNorm = color / 255
-		# colorNorm /= max(*colorNorm)
-		# normDiff = inputColorNorm - colorNorm
-		# error = np.max(np.abs(normDiff))
-
-		# diff = inputColor - color
-		# error = np.max(np.abs(diff))
-
-		error = colorErrors.COLOR_ERRORS[1](inputColor, color)
-
-		# colorHSV = colorsys.rgb_to_hsv(*(color / 255))
-		# error = np.sum(np.abs(np.array(inputColorHSV) - np.array(colorHSV)))
+		error = metric(inputColor, color)
 
 		if error < bestError:
 			bestError = error
@@ -82,16 +66,22 @@ def doTheThing(dif):
 	img.thumbnail(dif, PIL.Image.ANTIALIAS)
 	# img.show()
 
-	data = np.array(np.asarray(img))[:,:,:3]
-	colorIndices = np.zeros(data.shape[0:2], np.int32)
 
-	for y in range(data.shape[0]):
-		for x in range(data.shape[1]):
-			colorIndices[y, x], data[y, x] = closestColor(data[y, x])
+	dataList = []
+	colorIndicesList = []
+	for metric in colorErrors.COLOR_ERRORS:
+		data = np.array(np.asarray(img))[:,:,:3]
+		colorIndices = np.zeros(data.shape[0:2], np.int32)
+		for y in range(data.shape[0]):
+			for x in range(data.shape[1]):
+				colorIndices[y, x], data[y, x] = closestColor(data[y, x], metric)
+		colorIndicesList.append(colorIndices)
+		dataList.append(data)
 
-	return colorIndices, data
+	return colorIndicesList, dataList
 
 if __name__=="__main__":
-	colorIndices, data = doTheThing([100, 100])
+	colorIndicesList, dataList = doTheThing([100, 100])
+	data = np.concatenate(dataList, axis=0)
 	outputImg = PIL.Image.fromarray(data)
 	outputImg.resize((outputImg.size[0] * 5, outputImg.size[1] * 5), PIL.Image.NEAREST).show()
