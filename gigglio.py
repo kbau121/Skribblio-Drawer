@@ -4,6 +4,7 @@ import requests
 from io import BytesIO
 import colorsys
 import sys
+import colorErrors
 
 def fixColor(hexColor):
 	r = ((hexColor >> 16) % 256)
@@ -55,8 +56,10 @@ def closestColor(inputColor):
 		# normDiff = inputColorNorm - colorNorm
 		# error = np.max(np.abs(normDiff))
 
-		diff = inputColor - color
-		error = np.max(np.abs(diff))
+		# diff = inputColor - color
+		# error = np.max(np.abs(diff))
+
+		error = colorErrors.COLOR_ERRORS[1](inputColor, color)
 
 		# colorHSV = colorsys.rgb_to_hsv(*(color / 255))
 		# error = np.sum(np.abs(np.array(inputColorHSV) - np.array(colorHSV)))
