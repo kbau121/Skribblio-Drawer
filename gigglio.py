@@ -3,6 +3,7 @@ import PIL.Image
 import requests
 from io import BytesIO
 import colorsys
+import sys
 
 def fixColor(hexColor):
 	r = ((hexColor >> 16) % 256)
@@ -70,12 +71,15 @@ def closestColor(inputColor):
 def doTheThing(dif):
 	# url = "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_retouched.jpg/687px-Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_retouched.jpg"
 	# url = "https://vignette.wikia.nocookie.net/the-many-adventures-of-minecraft-rogers/images/4/44/1200x630bb.jpg/revision/latest?cb=20170512053111"
-	url = input("Image URL: ")
+	if len(sys.argv) > 1:
+		url = sys.argv[1]
+	else:
+		url = "https://vignette.wikia.nocookie.net/avatar/images/8/82/Fanon_Appa.png/revision/latest?cb=20130308032654&format=original"
 	img = PIL.Image.open(BytesIO(requests.get(url).content))
 	img.thumbnail(dif, PIL.Image.ANTIALIAS)
 	# img.show()
 
-	data = np.array(np.asarray(img))
+	data = np.array(np.asarray(img))[:,:,:3]
 	colorIndices = np.zeros(data.shape[0:2], np.int32)
 
 	for y in range(data.shape[0]):
