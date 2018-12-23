@@ -61,7 +61,8 @@ def doTheThing(dif):
 	if len(sys.argv) > 1:
 		url = sys.argv[1]
 	else:
-		url = "https://vignette.wikia.nocookie.net/avatar/images/8/82/Fanon_Appa.png/revision/latest?cb=20130308032654&format=original"
+		# url = "https://vignette.wikia.nocookie.net/avatar/images/8/82/Fanon_Appa.png/revision/latest?cb=20130308032654&format=original"
+		url = input("Image URL: ")
 	img = PIL.Image.open(BytesIO(requests.get(url).content))
 	img.thumbnail(dif, PIL.Image.ANTIALIAS)
 	# img.show()
