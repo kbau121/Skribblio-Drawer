@@ -80,8 +80,19 @@ def doTheThing(dif):
 
 	return colorIndicesList, dataList
 
+def tileImages(images, numColumns=3):
+
+	imagesToTile = list(images)
+	for i in range(numColumns - len(imagesToTile) % numColumns):
+		imagesToTile.append(255 * np.ones(images[0].shape, dtype=np.uint8))
+
+	rows = []
+	for i in range(0, len(imagesToTile), numColumns):
+		rows.append(np.concatenate(imagesToTile[i:i+numColumns], axis=1))
+	return np.concatenate(rows, axis=0)
+
 if __name__=="__main__":
 	colorIndicesList, dataList = doTheThing([100, 100])
-	data = np.concatenate(dataList, axis=0)
+	data = tileImages(dataList)
 	outputImg = PIL.Image.fromarray(data)
 	outputImg.resize((outputImg.size[0] * 5, outputImg.size[1] * 5), PIL.Image.NEAREST).show()
